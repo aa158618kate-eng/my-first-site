@@ -35,13 +35,12 @@
     }
     /* 비밀번호 화면 */
     #passwordScreen {
-      display: none;
+      display: none; /* 초기값 반드시 none */
       position: fixed;
       top:0; left:0;
       width: 100%; height: 100%;
       background: black;
       color: #ff4c4c;
-      display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
@@ -126,7 +125,9 @@ function boot() {
     document.getElementById("desktop").style.display = "block";
   }
 }
-boot();
+
+// DOM 완전히 로드 후 부팅 시작
+document.addEventListener("DOMContentLoaded", boot);
 
 /* 문서 클릭 → 비밀번호 화면 */
 function openPassword() {
@@ -137,7 +138,7 @@ function openPassword() {
 /* 비밀번호 확인 */
 function checkPassword() {
   const pw = document.getElementById("passwordInput").value.trim();
-  if (pw === "test") {   // 원하는 비밀번호
+  if (pw === "test") {
     document.getElementById("passwordScreen").style.display = "none";
     document.getElementById("content").style.display = "block";
   } else {

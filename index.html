@@ -1,12 +1,138 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-  <meta charset="UTF-8">
-  <title>테스트</title>
-</head>
-<body style="text-align: center; font-size: 28px; background-color: #f5fff7;">
+<body style="margin:0; background:black; font-family:'Courier New', monospace;">
 
-이 글자가 보이면 성공이에요 🌱
+<!-- 부팅 화면 -->
+<div id="boot" style="
+  color:#33ff33;
+  padding:40px;
+  white-space:pre-line;
+"></div>
+
+<!-- 바탕화면 -->
+<div id="desktop" style="
+  display:none;
+  width:100vw;
+  height:100vh;
+  background:#0a0a0a;
+  color:white;
+  padding:20px;
+">
+
+  <div onclick="openPassword()" style="
+    width:120px;
+    text-align:center;
+    cursor:pointer;
+  ">
+    📄
+    <div>RESEARCH_LOG_001</div>
+  </div>
+
+</div>
+
+<!-- 비밀번호 화면 -->
+<div id="passwordScreen" style="
+  display:none;
+  position:fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  background:black;
+  color:#ff4c4c;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+">
+
+  <h2>접근 제한</h2>
+  <p>비밀번호를 입력하십시오</p>
+
+  <input id="passwordInput" type="password" style="
+    padding:8px;
+    font-family:inherit;
+    background:black;
+    color:#ff4c4c;
+    border:1px solid #ff4c4c;
+  ">
+
+  <button onclick="checkPassword()" style="
+    margin-top:15px;
+    padding:8px 16px;
+    background:black;
+    color:#ff4c4c;
+    border:1px solid #ff4c4c;
+    cursor:pointer;
+  ">
+    확인
+  </button>
+
+  <p id="error" style="color:#ff4c4c;"></p>
+</div>
+
+<!-- 연구 기록 -->
+<div id="content" style="
+  display:none;
+  background:#0b0f14;
+  color:#e6e6e6;
+  min-height:100vh;
+  padding:40px;
+">
+
+<h1 style="color:#ff4c4c;">[기밀] 연구 기록 001</h1>
+<p>비인가 열람 금지</p>
+<hr style="border-color:#333;">
+
+<p>
+피험자는 수면 중 꿈의 구조가 외부 신호에 의해 변형된다고 보고함.
+</p>
+
+</div>
+
+<script>
+/* 부팅 */
+const bootText = [
+  "NPD Research Terminal v1.2",
+  "Booting system...",
+  "Loading secure files...",
+  "WARNING: Unauthorized access detected",
+  "",
+  "Press ENTER"
+];
+
+let i = 0;
+const bootDiv = document.getElementById("boot");
+
+function boot() {
+  if (i < bootText.length) {
+    bootDiv.innerHTML += bootText[i] + "\n";
+    i++;
+    setTimeout(boot, 600);
+  }
+}
+boot();
+
+/* 엔터 → 바탕화면 */
+document.addEventListener("keydown", e => {
+  if (e.key === "Enter") {
+    bootDiv.style.display = "none";
+    document.getElementById("desktop").style.display = "block";
+  }
+});
+
+/* 문서 클릭 */
+function openPassword() {
+  document.getElementById("desktop").style.display = "none";
+  document.getElementById("passwordScreen").style.display = "flex";
+}
+
+/* 비밀번호 확인 */
+function checkPassword() {
+  const pw = document.getElementById("passwordInput").value;
+  if (pw === "몽식") {
+    document.getElementById("passwordScreen").style.display = "none";
+    document.getElementById("content").style.display = "block";
+  } else {
+    document.getElementById("error").innerText = "ACCESS DENIED";
+  }
+}
+</script>
 
 </body>
-</html>

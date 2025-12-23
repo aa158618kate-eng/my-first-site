@@ -1,85 +1,110 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <title>NPD Research Terminal</title>
-  <style>
-    body {
-      margin: 0;
-      background: black;
-      font-family: 'Courier New', monospace;
-      color: #33ff33;
-    }
-    /* 바탕화면 */
-    #desktop {
-      display: none;
-      width: 100vw;
-      height: 100vh;
-      background: #008080;
-      color: white;
-      padding: 20px;
-      overflow: hidden;
-    }
-    /* 아이콘 */
-    .icon {
-      width: 80px;
-      text-align: center;
-      cursor: pointer;
-      display: inline-block;
-      margin: 10px;
-      border: 1px solid #fff;
-      padding: 10px;
-    }
-    .icon div {
-      font-size: 12px;
-    }
-    /* 비밀번호 화면 */
-    #passwordScreen {
-      display: none; /* 초기값 반드시 none */
-      position: fixed;
-      top:0; left:0;
-      width: 100%; height: 100%;
-      background: black;
-      color: #ff4c4c;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-    }
-    #passwordScreen input {
-      padding: 8px;
-      font-family: inherit;
-      background: black;
-      color: #ff4c4c;
-      border: 1px solid #ff4c4c;
-    }
-    #passwordScreen button {
-      margin-top: 15px;
-      padding: 8px 16px;
-      background: black;
-      color: #ff4c4c;
-      border: 1px solid #ff4c4c;
-      cursor: pointer;
-    }
-    /* 연구 기록 */
-    #content {
-      display: none;
-      background: #0b0f14;
-      color: #e6e6e6;
-      min-height: 100vh;
-      padding: 40px;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>Retro Terminal XP</title>
+<style>
+body {
+  margin: 0;
+  font-family: 'Courier New', monospace;
+  background: black;
+  color: #33ff33;
+  overflow: hidden;
+}
+
+/* CRT 효과 */
+#crtOverlay {
+  position: fixed; top:0; left:0; width:100%; height:100%;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+    0deg,
+    rgba(0,255,0,0.05),
+    rgba(0,255,0,0.05) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+  opacity:0.05;
+}
+
+/* 로딩 화면 */
+#loadingScreen {
+  position: fixed; top:0; left:0; width:100vw; height:100vh;
+  display:flex; flex-direction:column; justify-content:center; align-items:center;
+  background:black; color:#33ff33; font-size:24px;
+}
+#loadingBar { width: 300px; height: 20px; border:1px solid #33ff33; margin-top:20px; }
+#loadingFill { width:0%; height:100%; background:#33ff33; }
+.cursor { display:inline-block; width:10px; background:#33ff33; margin-left:2px; animation:blink 1s infinite; vertical-align:bottom; }
+@keyframes blink {0%,50%,100%{opacity:1;} 25%,75%{opacity:0;} }
+
+/* 바탕화면 */
+#desktop { display:none; width:100vw; height:100vh; background:#008080; color:white; padding:20px; position:relative; }
+.icon { width:80px; text-align:center; cursor:pointer; display:inline-block; margin:10px; border:1px solid #fff; padding:10px; }
+.icon div { font-size:12px; }
+
+/* 팝업창 */
+.window {
+  position:absolute; width:400px; height:300px; background:#0b0f14; color:white;
+  border:2px solid #33ff33; display:none; top:50px; left:50px; z-index:100;
+}
+.window-header { background:#004080; padding:5px; display:flex; justify-content:space-between; cursor:move; }
+.window-body { padding:10px; }
+.window button { background:red; border:none; color:white; cursor:pointer; }
+
+/* 비밀번호 화면 */
+#passwordScreen { display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+  background:black; color:#ff4c4c; flex-direction:column; justify-content:center; align-items:center; }
+#passwordScreen input { padding:8px; font-family:inherit; background:black; color:#ff4c4c; border:1px solid #ff4c4c; }
+#passwordScreen button { margin-top:15px; padding:8px 16px; background:black; color:#ff4c4c; border:1px solid #ff4c4c; cursor:pointer; }
+#passwordScreen p {color:#ff4c4c;}
+
+/* 연구 기록 */
+#content { display:none; background:#0b0f14; color:#e6e6e6; min-height:100vh; padding:40px; }
+
+/* 작업 표시줄 */
+#taskbar {
+  position: fixed; bottom:0; left:0; width:100%; height:30px;
+  background:#004080; color:white; display:flex; justify-content:space-between; align-items:center;
+  padding:0 5px; font-size:14px;
+}
+#startButton { background:#0060c0; padding:2px 8px; cursor:pointer; }
+.taskbar-apps span { margin:0 5px; cursor:pointer; }
+#clock { min-width:60px; text-align:right; }
+</style>
 </head>
 <body>
 
-<!-- 부팅 화면 -->
-<div id="boot" style="padding:40px; white-space:pre-line;"></div>
+<div id="crtOverlay"></div>
+
+<!-- 로딩 화면 -->
+<div id="loadingScreen">
+  <p>로딩 중<span class="cursor"></span></p>
+  <div id="loadingBar"><div id="loadingFill"></div></div>
+</div>
 
 <!-- 바탕화면 -->
 <div id="desktop">
-  <div class="icon" onclick="openPassword()">
-    📄
-    <div>RESEARCH_LOG_001</div>
+  <div class="icon" onclick="openPassword()">📄<div>RESEARCH_LOG_001</div></div>
+  <div class="icon" onclick="openWindow('docWindow2')">🗂<div>LOG_002</div></div>
+  <div class="icon" onclick="openWindow('terminalWindow')">🖥<div>TERMINAL</div></div>
+</div>
+
+<!-- 팝업창 예시 -->
+<div class="window" id="docWindow2">
+  <div class="window-header">
+    <span>LOG_002</span><button onclick="closeWindow('docWindow2')">X</button>
+  </div>
+  <div class="window-body">
+    <p>여기에 LOG_002 내용</p>
+  </div>
+</div>
+
+<div class="window" id="terminalWindow">
+  <div class="window-header">
+    <span>TERMINAL</span><button onclick="closeWindow('terminalWindow')">X</button>
+  </div>
+  <div class="window-body">
+    <p>터미널 창</p>
   </div>
 </div>
 
@@ -89,7 +114,7 @@
   <p>비밀번호를 입력하십시오</p>
   <input id="passwordInput" type="password">
   <button onclick="checkPassword()">확인</button>
-  <p id="error" style="color:#ff4c4c;"></p>
+  <p id="error"></p>
 </div>
 
 <!-- 연구 기록 -->
@@ -100,51 +125,62 @@
   <p>피험자는 수면 중 꿈의 구조가 외부 신호에 의해 변형된다고 보고함.</p>
 </div>
 
+<!-- 작업 표시줄 -->
+<div id="taskbar">
+  <div id="startButton">시작</div>
+  <div class="taskbar-apps">
+    <span>📄</span>
+    <span>🖥</span>
+    <span>🗂</span>
+  </div>
+  <div id="clock"></div>
+</div>
+
 <script>
-/* 부팅 텍스트 */
-const bootText = [
-  "NPD Research Terminal v1.2",
-  "Booting system...",
-  "Loading secure files...",
-  "WARNING: Unauthorized access detected",
-  "",
-  "Starting desktop..."
-];
-
-let i = 0;
-const bootDiv = document.getElementById("boot");
-
-function boot() {
-  if (i < bootText.length) {
-    bootDiv.innerHTML += bootText[i] + "\n";
-    i++;
-    setTimeout(boot, 400);
-  } else {
-    // 부팅 텍스트 끝나면 자동으로 바탕화면 표시
-    bootDiv.style.display = "none";
-    document.getElementById("desktop").style.display = "block";
+/* 로딩 막대 진행 */
+const loadingFill = document.getElementById("loadingFill");
+let progress=0;
+const loadInterval = setInterval(()=>{
+  progress += Math.random()*5;
+  if(progress>100) progress=100;
+  loadingFill.style.width = progress+"%";
+  if(progress>=100){
+    clearInterval(loadInterval);
+    document.getElementById("loadingScreen").style.display="none";
+    document.getElementById("desktop").style.display="block";
   }
-}
-
-// DOM 완전히 로드 후 부팅 시작
-document.addEventListener("DOMContentLoaded", boot);
+},100);
 
 /* 문서 클릭 → 비밀번호 화면 */
-function openPassword() {
-  document.getElementById("desktop").style.display = "none";
-  document.getElementById("passwordScreen").style.display = "flex";
+function openPassword(){
+  document.getElementById("desktop").style.display="none";
+  document.getElementById("passwordScreen").style.display="flex";
 }
 
 /* 비밀번호 확인 */
-function checkPassword() {
+function checkPassword(){
   const pw = document.getElementById("passwordInput").value.trim();
-  if (pw === "test") {
-    document.getElementById("passwordScreen").style.display = "none";
-    document.getElementById("content").style.display = "block";
-  } else {
-    document.getElementById("error").innerText = "ACCESS DENIED";
+  if(pw==="test"){
+    document.getElementById("passwordScreen").style.display="none";
+    document.getElementById("content").style.display="block";
+  }else{
+    document.getElementById("error").innerText="ACCESS DENIED";
   }
 }
+
+/* 팝업 창 열기/닫기 */
+function openWindow(id){document.getElementById(id).style.display='block';}
+function closeWindow(id){document.getElementById(id).style.display='none';}
+
+/* 시계 */
+function updateClock(){
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  document.getElementById("clock").innerText=`${h}:${m}`;
+}
+setInterval(updateClock,1000);
+updateClock();
 </script>
 
 </body>

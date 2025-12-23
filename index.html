@@ -76,18 +76,18 @@
   padding:40px;
 ">
 
-<h1 style="color:#ff4c4c;">[기밀] 연구 기록 001</h1>
-<p>비인가 열람 금지</p>
-<hr style="border-color:#333;">
+  <h1 style="color:#ff4c4c;">[기밀] 연구 기록 001</h1>
+  <p>비인가 열람 금지</p>
+  <hr style="border-color:#333;">
 
-<p>
-피험자는 수면 중 꿈의 구조가 외부 신호에 의해 변형된다고 보고함.
-</p>
+  <p>
+    피험자는 수면 중 꿈의 구조가 외부 신호에 의해 변형된다고 보고함.
+  </p>
 
 </div>
 
 <script>
-/* 부팅 */
+/* 부팅 텍스트 */
 const bootText = [
   "NPD Research Terminal v1.2",
   "Booting system...",
@@ -100,6 +100,7 @@ const bootText = [
 let i = 0;
 const bootDiv = document.getElementById("boot");
 
+/* 부팅 출력 */
 function boot() {
   if (i < bootText.length) {
     bootDiv.innerHTML += bootText[i] + "\n";
@@ -109,15 +110,15 @@ function boot() {
 }
 boot();
 
-/* 엔터 → 바탕화면 */
+/* 엔터 키 → 부팅 화면에서만 바탕화면으로 */
 document.addEventListener("keydown", e => {
-  if (e.key === "Enter") {
+  if (e.key === "Enter" && bootDiv.style.display !== "none") {
     bootDiv.style.display = "none";
     document.getElementById("desktop").style.display = "block";
   }
 });
 
-/* 문서 클릭 */
+/* 문서 클릭 → 비밀번호 화면 */
 function openPassword() {
   document.getElementById("desktop").style.display = "none";
   document.getElementById("passwordScreen").style.display = "flex";
@@ -125,8 +126,8 @@ function openPassword() {
 
 /* 비밀번호 확인 */
 function checkPassword() {
-  const pw = document.getElementById("passwordInput").value;
- if (pw === "test") {
+  const pw = document.getElementById("passwordInput").value.trim();
+  if (pw === "test") {   // ← 여기 비밀번호 바꾸면 됨
     document.getElementById("passwordScreen").style.display = "none";
     document.getElementById("content").style.display = "block";
   } else {

@@ -70,7 +70,7 @@
     font-size: 12px;
   }
   .window {
-    position: absolute; width: 420px; background: #c0c0c0; border: 2px solid #000;
+    position: absolute; width: 420px; background: #fff; border: 2px solid #000;
     box-shadow: inset 2px 2px #fff, inset -2px -2px #808080;
   }
   .titlebar {
@@ -83,7 +83,7 @@
     box-shadow: inset 1px 1px #fff, inset -1px -1px #808080; text-align: center; line-height: 18px; cursor: pointer;
   }
   .content {
-    padding: 10px; background: #e0e0e0; border-top: 2px solid #fff; min-height: 160px;
+    padding: 10px; background: #fff; border-top: 2px solid #fff; min-height: 260px;
     color: #000; font-size: 13px; white-space: pre-wrap;
   }
   .shake { animation: shake 0.3s infinite; }
@@ -97,7 +97,7 @@
 </style>
 </head>
 <body>
-<div id="bootScreen">
+  <div id="bootScreen">
   <div id="bootMessage"></div> <!-- 환영 메시지에는 glitch 제거 -->
   <div class="loadingBar"><div class="progress"></div></div>
 </div>
@@ -143,7 +143,7 @@
 </div>
 
 <template id="windowTemplate">
-  <div class="window" style="top:70px;left:120px">
+  <div class="window">
     <div class="titlebar">
       <span class="title">Window</span>
       <div class="controls">
@@ -249,8 +249,6 @@ function openHorrorDoc() {
   setTimeout(() => {
     for (let i = 0; i < 3; i++) {
       const w = createWindow('SYSTEM FAILURE', `<div>꿈 구조 손상: 코드 ${100 + i}</div>`);
-      w.style.left = (60 + Math.random() * 420) + 'px';
-      w.style.top = (40 + Math.random() * 260) + 'px';
     }
   }, 2300);
 
@@ -273,7 +271,8 @@ function checkHorrorPass(){
   const pass = document.getElementById('horrorPass').value;
   if(pass === "secret123"){
     const win = createWindow("보안 문서", "<div id='horrorReal' class='glitch'>진짜 공포 문서 내용...<br>여기서부터는 세계관의 어두운 비밀이 드러납니다.</div>");
-    horrorOpened = 3;
+    // 비번 맞으면 열람 성공 → 상태 초기화
+    horrorOpened = 0;
   } else {
     alert("비밀번호가 틀렸습니다.");
   }
@@ -287,6 +286,15 @@ function createWindow(title, htmlContent) {
   if (typeof htmlContent === 'string') {
     content.innerHTML = htmlContent;
   }
+
+  // 화면 크기 기준으로 중앙 배치
+  const winWidth = 420;
+  const winHeight = 260;
+  const centerX = (window.innerWidth - winWidth) / 2;
+  const centerY = (window.innerHeight - winHeight) / 2;
+  node.style.left = centerX + "px";
+  node.style.top = centerY + "px";
+
   const task = document.createElement('div');
   task.className = 'task-item';
   task.textContent = title;
@@ -295,6 +303,7 @@ function createWindow(title, htmlContent) {
     focusWindow(node);
   });
   tasks.appendChild(task);
+
   node.querySelector('.btn-close').addEventListener('click', () => {
     node.remove();
     task.remove();
@@ -302,6 +311,7 @@ function createWindow(title, htmlContent) {
   node.querySelector('.btn-min').addEventListener('click', () => {
     node.classList.add('hidden');
   });
+
   makeDraggable(node);
   document.body.appendChild(node);
   focusWindow(node);
@@ -347,3 +357,4 @@ document.querySelectorAll('.icon').forEach(icon => {
 </script>
 </body>
 </html>
+

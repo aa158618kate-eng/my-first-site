@@ -1,88 +1,104 @@
-<body style="margin:0; background:black; font-family:'Courier New', monospace; color:#33ff33;">
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>NPD Research Terminal</title>
+  <style>
+    body {
+      margin: 0;
+      background: black;
+      font-family: 'Courier New', monospace;
+      color: #33ff33;
+    }
+    /* 바탕화면 */
+    #desktop {
+      display: none;
+      width: 100vw;
+      height: 100vh;
+      background: #008080;
+      color: white;
+      padding: 20px;
+      overflow: hidden;
+    }
+    /* 아이콘 */
+    .icon {
+      width: 80px;
+      text-align: center;
+      cursor: pointer;
+      display: inline-block;
+      margin: 10px;
+      border: 1px solid #fff;
+      padding: 10px;
+    }
+    .icon div {
+      font-size: 12px;
+    }
+    /* 비밀번호 화면 */
+    #passwordScreen {
+      display: none;
+      position: fixed;
+      top:0; left:0;
+      width: 100%; height: 100%;
+      background: black;
+      color: #ff4c4c;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    #passwordScreen input {
+      padding: 8px;
+      font-family: inherit;
+      background: black;
+      color: #ff4c4c;
+      border: 1px solid #ff4c4c;
+    }
+    #passwordScreen button {
+      margin-top: 15px;
+      padding: 8px 16px;
+      background: black;
+      color: #ff4c4c;
+      border: 1px solid #ff4c4c;
+      cursor: pointer;
+    }
+    /* 연구 기록 */
+    #content {
+      display: none;
+      background: #0b0f14;
+      color: #e6e6e6;
+      min-height: 100vh;
+      padding: 40px;
+    }
+  </style>
+</head>
+<body>
 
 <!-- 부팅 화면 -->
 <div id="boot" style="padding:40px; white-space:pre-line;"></div>
 
 <!-- 바탕화면 -->
-<div id="desktop" style="
-  display:none;
-  width:100vw;
-  height:100vh;
-  background:#008080;
-  color:white;
-  padding:20px;
-  overflow:hidden;
-">
-
-  <!-- 문서 아이콘 -->
-  <div onclick="openPassword()" style="
-    width:80px;
-    text-align:center;
-    cursor:pointer;
-    display:inline-block;
-    margin:10px;
-    border:1px solid #fff;
-    padding:10px;
-  ">
+<div id="desktop">
+  <div class="icon" onclick="openPassword()">
     📄
-    <div style="font-size:12px;">RESEARCH_LOG_001</div>
+    <div>RESEARCH_LOG_001</div>
   </div>
-
 </div>
 
 <!-- 비밀번호 화면 -->
-<div id="passwordScreen" style="
-  display:none;
-  position:fixed;
-  top:0; left:0;
-  width:100%; height:100%;
-  background:black;
-  color:#ff4c4c;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-">
-
+<div id="passwordScreen">
   <h2>접근 제한</h2>
   <p>비밀번호를 입력하십시오</p>
-
-  <input id="passwordInput" type="password" style="
-    padding:8px;
-    font-family:inherit;
-    background:black;
-    color:#ff4c4c;
-    border:1px solid #ff4c4c;
-  ">
-
-  <button onclick="checkPassword()" style="
-    margin-top:15px;
-    padding:8px 16px;
-    background:black;
-    color:#ff4c4c;
-    border:1px solid #ff4c4c;
-    cursor:pointer;
-  ">
-    확인
-  </button>
-
+  <input id="passwordInput" type="password">
+  <button onclick="checkPassword()">확인</button>
   <p id="error" style="color:#ff4c4c;"></p>
 </div>
 
 <!-- 연구 기록 -->
-<div id="content" style="
-  display:none;
-  background:#0b0f14;
-  color:#e6e6e6;
-  min-height:100vh;
-  padding:40px;
-">
-
+<div id="content">
   <h1 style="color:#ff4c4c;">[기밀] 연구 기록 001</h1>
   <p>비인가 열람 금지</p>
   <hr style="border-color:#333;">
   <p>피험자는 수면 중 꿈의 구조가 외부 신호에 의해 변형된다고 보고함.</p>
-
 </div>
 
 <script>
@@ -93,7 +109,7 @@ const bootText = [
   "Loading secure files...",
   "WARNING: Unauthorized access detected",
   "",
-  "Press ENTER"
+  "Starting desktop..."
 ];
 
 let i = 0;
@@ -103,23 +119,19 @@ function boot() {
   if (i < bootText.length) {
     bootDiv.innerHTML += bootText[i] + "\n";
     i++;
-    setTimeout(boot, 400); // 글자 속도
+    setTimeout(boot, 400);
+  } else {
+    // 부팅 텍스트 끝나면 자동으로 바탕화면 표시
+    bootDiv.style.display = "none";
+    document.getElementById("desktop").style.display = "block";
   }
 }
 boot();
 
-/* 엔터 키 → 부팅 후 바탕화면 표시 */
-document.addEventListener("keydown", e => {
-  if (e.key === "Enter" && bootDiv.style.display !== "none") {
-    bootDiv.style.display = "none";
-    document.getElementById("desktop").style.display = "block";
-  }
-});
-
 /* 문서 클릭 → 비밀번호 화면 */
 function openPassword() {
-  document.getElementById("desktop").style.display = "none"; // 바탕화면 숨기기
-  document.getElementById("passwordScreen").style.display = "flex"; // 비밀번호 화면 보여주기
+  document.getElementById("desktop").style.display = "none";
+  document.getElementById("passwordScreen").style.display = "flex";
 }
 
 /* 비밀번호 확인 */
@@ -135,3 +147,4 @@ function checkPassword() {
 </script>
 
 </body>
+</html>

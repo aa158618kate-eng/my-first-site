@@ -5,14 +5,11 @@
 <title>Windows Classic Simulator</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <style>
-  /* 기본 */
   html, body { height: 100%; }
   body {
     margin: 0; background: #008080; font-family: "MS Sans Serif", Tahoma, Geneva, sans-serif;
     overflow: hidden;
   }
-
-  /* 부팅 화면 */
   #bootScreen {
     position: fixed; inset: 0; background: #000080; color: #fff;
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
@@ -21,8 +18,6 @@
   .loadingBar { width: 220px; height: 18px; border: 2px solid #fff; }
   .progress { width: 0; height: 100%; background: #00ff00; animation: load 3.8s linear forwards; }
   @keyframes load { to { width: 100%; } }
-
-  /* 로그인 화면 */
   #loginScreen {
     position: fixed; inset: 0; background: #c0c0c0; display: none;
     align-items: center; justify-content: center; flex-direction: column; gap: 8px;
@@ -32,10 +27,6 @@
     background: #c0c0c0; border: 2px solid #000;
     box-shadow: inset 2px 2px #fff, inset -2px -2px #808080; padding: 12px 14px; min-width: 280px;
   }
-  #loginBox input { width: 100%; box-sizing: border-box; }
-  #loginMsg { color: #800000; min-height: 18px; }
-
-  /* 데스크톱 */
   #desktop { position: absolute; inset: 0 0 32px 0; display: none; }
   .icon {
     width: 82px; text-align: center; color: #fff; font-size: 12px;
@@ -43,8 +34,6 @@
   }
   .icon img { width: 32px; height: 32px; image-rendering: pixelated; }
   .icon .label { margin-top: 4px; text-shadow: 1px 1px #000; }
-
-  /* 작업 표시줄 + 시계 */
   .taskbar {
     position: fixed; bottom: 0; left: 0; right: 0; height: 32px;
     background: #c0c0c0; border-top: 2px solid #fff;
@@ -68,8 +57,6 @@
     box-shadow: inset 2px 2px #fff, inset -2px -2px #808080;
     font-size: 12px;
   }
-
-  /* 창 */
   .window {
     position: absolute; width: 420px; background: #c0c0c0; border: 2px solid #000;
     box-shadow: inset 2px 2px #fff, inset -2px -2px #808080;
@@ -87,42 +74,20 @@
     padding: 10px; background: #e0e0e0; border-top: 2px solid #fff; min-height: 160px;
     color: #000; font-size: 13px; white-space: pre-wrap;
   }
-  .hidden { display: none !important; }
-
-  /* 공포: 화면 지지직 오버레이 */
-  .glitch {
-    position: fixed; inset: 0; pointer-events: none; mix-blend-mode: screen;
-    background: repeating-linear-gradient(180deg, rgba(255,255,255,0.08) 0 2px, rgba(0,0,0,0.05) 2px 4px);
-    animation: flicker 0.08s linear infinite;
-  }
-  @keyframes flicker {
-    0% { opacity: 0.15; transform: translateY(-1px); filter: contrast(110%) brightness(110%); }
-    50% { opacity: 0.3; transform: translateY(1px); filter: contrast(130%) brightness(120%); }
-    100% { opacity: 0.15; transform: translateY(-1px); filter: contrast(110%) brightness(110%); }
-  }
-  .shake { animation: shake 0.25s linear 3; }
-  @keyframes shake {
-    0% { transform: translate(0, 0); }
-    25% { transform: translate(2px, -2px); }
-    50% { transform: translate(-2px, 2px); }
-    75% { transform: translate(2px, 2px); }
-    100% { transform: translate(0, 0); }
-  }
 </style>
 </head>
 <body>
-
-<!-- 부팅 화면 -->
 <div id="bootScreen">
   <div>Windows 95</div>
   <div class="loadingBar"><div class="progress"></div></div>
 </div>
 
-<!-- 로그인 화면 -->
 <div id="loginScreen">
   <div id="loginBox">
     <p style="margin:0 0 6px 0; font-weight:bold;">로그인</p>
-    <p style="margin:0 0 6px 0;">비밀번호를 입력하세요:</p>
+    <p>이름을 입력하세요:</p>
+    <input type="text" id="loginName" />
+    <p>비밀번호를 입력하세요:</p>
     <input type="password" id="loginPass" />
     <div style="margin-top:8px; display:flex; gap:8px;">
       <button id="loginBtn">로그인</button>
@@ -132,34 +97,27 @@
   </div>
 </div>
 
-<!-- 데스크톱 -->
 <div id="desktop">
-  <!-- 입사 지원서 -->
   <div class="icon" style="top:20px;left:20px" data-open="doc:world">
-    <img src="https://cdn-icons-png.flaticon.com/512/337/337946.png" alt="doc"><div class="label">입사 지원서</div>
+    <img src="https://cdn-icons-png.flaticon.com/512/337/337946.png"><div class="label">입사 지원서</div>
   </div>
-  <!-- 보안 문서(공포) -->
-  <div class="icon" style="top:110px;left:20px" data-open="doc:horror">
-    <img src="https://cdn-icons-png.flaticon.com/512/337/337946.png" alt="doc"><div class="label">보안 문서</div>
+  <div class="icon" style="top:110px;left:20px" data-open="doc:horror" id="horrorIcon">
+    <img src="https://cdn-icons-png.flaticon.com/512/337/337946.png"><div class="label">보안 문서</div>
   </div>
-  <!-- NPC 소개 -->
-  <div class="icon" style="top:200px;left:20px" data-open="npc">
-    <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png" alt="npc"><div class="label">NPC 소개</div>
+  <div class="icon" style="top:110px;left:20px;display:none" data-open="doc:recruit" id="recruitIcon">
+    <img src="https://cdn-icons-png.flaticon.com/512/337/337946.png"><div class="label">신입사원 모집 공지</div>
   </div>
-  <!-- Google (차단) -->
-  <div class="icon" style="top:290px;left:20px" data-open="googleApp">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg" alt="google"><div class="label">Google</div>
+  <div class="icon" style="top:200px;left:20px" data-open="npc" id="npc">
+    <img src="https://cdn-icons-png.flaticon.com/512/149/149071.png"><div class="label">NPC 소개</div>
   </div>
 </div>
 
-<!-- 작업 표시줄 -->
 <div class="taskbar">
   <div class="start-btn" id="startBtn">Start</div>
   <div class="tasks" id="tasks"></div>
   <div class="clock" id="clock"></div>
 </div>
 
-<!-- 창 템플릿 -->
 <template id="windowTemplate">
   <div class="window" style="top:70px;left:120px">
     <div class="titlebar">
@@ -174,181 +132,133 @@
 </template>
 
 <script>
-  // 상태
-  let zTop = 10;
-  const tasks = document.getElementById('tasks');
-  const tpl = document.getElementById('windowTemplate');
+let zTop = 10;
+let isGuest = false;
+const tasks = document.getElementById('tasks');
+const tpl = document.getElementById('windowTemplate');
 
-  // 부팅 → 로그인
-  setTimeout(() => {
-    document.getElementById('bootScreen').style.display = 'none';
-    document.getElementById('loginScreen').style.display = 'flex';
-  }, 3800);
+setTimeout(() => {
+  document.getElementById('bootScreen').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'flex';
+}, 3800);
 
-  // 로그인 처리
-  document.getElementById('loginBtn').addEventListener('click', checkLogin);
-  document.getElementById('guestBtn').addEventListener('click', () => enterDesktop());
-  function checkLogin() {
-    const pass = document.getElementById('loginPass').value;
-    if (pass === 'secret123') {
-      enterDesktop();
+document.getElementById('loginBtn').addEventListener('click', () => {
+  const name = document.getElementById('loginName').value || "사용자";
+  const pass = document.getElementById('loginPass').value;
+  if (pass === "secret123") {
+    enterDesktop(name, false);
+  } else {
+    document.getElementById('loginMsg').textContent = "비밀번호가 틀렸습니다.";
+  }
+});
+
+document.getElementById('guestBtn').addEventListener('click', () => {
+  enterDesktop("사용자", true);
+});
+
+function enterDesktop(userName, guest=false) {
+  isGuest = guest;
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('desktop').style.display = 'block';
+  const msg = guest ? "사용자님 환영합니다" : `${userName}님 환영합니다`;
+  createWindow("환영합니다", msg + "<br>시스템에 접속하셨습니다만...");
+
+  if (guest) {
+    document.getElementById('horrorIcon').style.display = "none";
+    document.getElementById('recruitIcon').style.display = "block";
+    document.getElementById('npc').style.display = "none";
+  } else {
+    document.getElementById('horrorIcon').style.display = "block";
+    document.getElementById('recruitIcon').style.display = "none";
+    document.getElementById('npc').style.display = "block";
+  }
+}
+
+function dispatchOpen(token) {
+  if (token === 'doc:world') {
+    createWindow("입사 지원서", "세계관 문서 내용...");
+  } else if (token === 'npc') {
+    if(isGuest){
+      createWindow("권한 없음", "게스트 계정은 NPC 문서를 열람할 수 없습니다.");
     } else {
-      document.getElementById('loginMsg').textContent = '비밀번호가 틀렸습니다.';
+      createWindow("NPC 소개", "<ul><li>분석팀장...</li><li>필드요원...</li></ul>");
     }
-  }
-  function enterDesktop() {
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('desktop').style.display = 'block';
-  }
-
-  // 시계
-  function updateClock() {
-    const now = new Date();
-    const hh = String(now.getHours()).padStart(2, '0');
-    const mm = String(now.getMinutes()).padStart(2, '0');
-    document.getElementById('clock').textContent = `${hh}:${mm}`;
-  }
-  setInterval(updateClock, 1000); updateClock();
-
-  // 창 생성
-  function createWindow(title, htmlContent) {
-    const node = tpl.content.firstElementChild.cloneNode(true);
-    node.style.zIndex = ++zTop;
-    node.querySelector('.title').textContent = title;
-    const content = node.querySelector('.content');
-    if (typeof htmlContent === 'string') {
-      content.innerHTML = htmlContent;
+  } else if (token === 'doc:horror') {
+    if(isGuest){
+      createWindow("권한 없음", "게스트 계정은 공포 문서를 열람할 수 없습니다.");
+    } else {
+      createWindow("보안 문서", "⚠️ 트라우마를 유발할 수 있습니다. 그래도 열람하시겠습니까?");
     }
-    // 제어 버튼
-    node.querySelector('.btn-close').addEventListener('click', () => {
-      node.remove();
-    });
-    node.querySelector('.btn-min').addEventListener('click', () => {
-      node.classList.add('hidden');
-    });
-    // 작업 표시줄 항목
-    const task = document.createElement('div');
-    task.className = 'task-item'; task.textContent = title;
-    task.addEventListener('click', () => {
-      node.classList.remove('hidden'); focusWindow(node);
-    });
-    tasks.appendChild(task);
-    node.addEventListener('remove', () => task.remove());
+  } else if (token === 'doc:recruit') {
+    createWindow("신입사원 모집 공지", "신입사원 모집 공지 내용...\n지원 자격: ...\n마감일: ...");
+  }
+}
 
-    // 드래그
-    makeDraggable(node);
-
-    document.body.appendChild(node);
+function createWindow(title, htmlContent) {
+  const node = tpl.content.firstElementChild.cloneNode(true);
+  node.style.zIndex = ++zTop;
+  node.querySelector('.title').textContent = title;
+  const content = node.querySelector('.content');
+  if (typeof htmlContent === 'string') {
+    content.innerHTML = htmlContent;
+  }
+  const task = document.createElement('div');
+  task.className = 'task-item';
+  task.textContent = title;
+  task.addEventListener('click', () => {
+    node.classList.remove('hidden');
     focusWindow(node);
-    return node;
-  }
-
-  function focusWindow(win) { win.style.zIndex = ++zTop; }
-
-  function makeDraggable(win) {
-    const bar = win.querySelector('.titlebar');
-    let sx=0, sy=0, ox=0, oy=0, dragging=false;
-    bar.addEventListener('mousedown', (e) => {
-      dragging = true; sx = e.clientX; sy = e.clientY;
-      ox = parseInt(win.style.left || 120, 10); oy = parseInt(win.style.top || 70, 10);
-      document.addEventListener('mousemove', onMove);
-      document.addEventListener('mouseup', onUp);
-    });
-    function onMove(e) {
-      if (!dragging) return;
-      const dx = e.clientX - sx, dy = e.clientY - sy;
-      win.style.left = (ox + dx) + 'px';
-      win.style.top  = (oy + dy) + 'px';
-    }
-    function onUp() {
-      dragging = false;
-      document.removeEventListener('mousemove', onMove);
-      document.removeEventListener('mouseup', onUp);
-    }
-  }
-
-  // 아이콘 더블클릭
-  document.querySelectorAll('.icon').forEach(ic => {
-    ic.addEventListener('dblclick', () => {
-      const token = ic.dataset.open;
-      dispatchOpen(token);
-    });
   });
+  tasks.appendChild(task);
+  node.querySelector('.btn-close').addEventListener('click', () => {
+    node.remove();
+    task.remove();
+  });
+  node.querySelector('.btn-min').addEventListener('click', () => {
+    node.classList.add('hidden');
+  });
+  makeDraggable(node);
+  document.body.appendChild(node);
+  focusWindow(node);
+  return node;
+}
 
-  // 열기 라우팅
-  function dispatchOpen(token) {
-    if (token === 'doc:world') {
-      const text = `2044년, 인간이 꿈을 꾸는 이유를 연구하던 뇌과학자들은
-악몽이 단순한 심리적 반응이나 스트레스의 부산물이 아니라,
-외부 요인에 의해 변질된 꿈의 한 형태일 가능성에 주목하기 시작했다.
-연구진은 이 현상을 夢蝕(몽식)이라 명명했다.`;
-      createWindow('입사 지원서', `<pre>${escapeHtml(text)}</pre>`);
-    } else if (token === 'doc:horror') {
-      openHorrorDoc();
-    } else if (token === 'npc') {
-      createWindow('NPC 소개', `<ul style="margin:0;padding-left:18px">
-<li><b>분석팀장:</b> 꿈 구조 이상 감시</li>
-<li><b>필드요원:</b> 몽식 제거 임무</li>
-<li><b>기록관:</b> 사례 보존 및 열람 통제</li>
-</ul>`);
-    } else if (token === 'googleApp') {
-      createWindow('네트워크 오류', `<div>네트워크가 차단되었습니다. 앱을 실행할 수 없습니다.</div>`);
+function focusWindow(node) {
+  node.style.zIndex = ++zTop;
+}
+
+function makeDraggable(win) {
+  const bar = win.querySelector('.titlebar');
+  let offsetX, offsetY, dragging = false;
+  bar.addEventListener('mousedown', e => {
+    dragging = true;
+    offsetX = e.clientX - win.offsetLeft;
+    offsetY = e.clientY - win.offsetTop;
+    focusWindow(win);
+  });
+  document.addEventListener('mousemove', e => {
+    if (dragging) {
+      win.style.left = (e.clientX - offsetX) + 'px';
+      win.style.top = (e.clientY - offsetY) + 'px';
     }
-  }
+  });
+  document.addEventListener('mouseup', () => dragging = false);
+}
 
-  // 공포 문서 연출
-  function openHorrorDoc() {
-    const win = createWindow('보안 문서', `<pre id="horrorText">접근 권한 확인 중...
-몽식 관련 기밀 문서입니다.
-표준 열람 절차를 진행합니다.</pre>`);
-    const textEl = win.querySelector('#horrorText');
+function updateClock() {
+  const now = new Date();
+  document.getElementById('clock').textContent =
+    now.getHours().toString().padStart(2,'0') + ":" +
+    now.getMinutes().toString().padStart(2,'0');
+}
+setInterval(updateClock, 1000);
+updateClock();
 
-    // 1) 약간의 지연 후 흔들림
-    setTimeout(() => { win.classList.add('shake'); }, 800);
-
-    // 2) 화면 지지직 오버레이
-    setTimeout(() => {
-      const overlay = document.createElement('div');
-      overlay.className = 'glitch';
-      document.body.appendChild(overlay);
-      setTimeout(() => overlay.remove(), 2600);
-    }, 1200);
-
-    // 3) 텍스트 깨짐
-    setTimeout(() => {
-      textEl.textContent = glitchText(textEl.textContent);
-    }, 1500);
-
-    // 4) 경고 팝업
-    setTimeout(() => {
-      createWindow('경고', `<div>접근할 수 없습니다. 시스템 무결성 오류가 감지되었습니다.</div>`);
-    }, 1900);
-
-    // 5) 에러 창 자동 생성
-    setTimeout(() => {
-      for (let i = 0; i < 3; i++) {
-        const w = createWindow('SYSTEM FAILURE', `<div>꿈 구조 손상: 코드 ${100 + i}</div>`);
-        // 랜덤 위치
-        w.style.left = (60 + Math.random() * 420) + 'px';
-        w.style.top  = (40 + Math.random() * 260) + 'px';
-      }
-    }, 2300);
-  }
-
-  // 텍스트 깨짐 함수
-  function glitchText(s) {
-    const map = ['#','?','▒','░','█','*','~'];
-    return s.split('').map((ch, i) => {
-      if (ch === '\n' || ch === ' ') return ch;
-      // 점점 심해지게 무작위 대체
-      return Math.random() < 0.35 ? map[Math.floor(Math.random()*map.length)] : ch;
-    }).join('');
-  }
-
-  // HTML escape
-  function escapeHtml(str) {
-    return str.replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-  }
+document.querySelectorAll('.icon').forEach(icon => {
+  icon.addEventListener('dblclick', () => {
+    dispatchOpen(icon.dataset.open);
+  });
+});
 </script>
 </body>
 </html>
